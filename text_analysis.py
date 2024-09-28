@@ -45,14 +45,9 @@ def detect_language_errors(text):
 
 def analyze_text(text):
     flesch, gunning_fog = calculate_readability(text)
-    print(f"Flesch Reading Ease Score: {flesch}")
-    print(f"Gunning Fog Index: {gunning_fog}")
-
-    # Detect language errors
     language_errors = detect_language_errors(text)
-    print("Language Errors Detected:")
-    for error in language_errors:
-        print(error)
+    return {"flesch": flesch, "gunning": gunning_fog, "errors": language_errors}
+
 
 
 def extract_subtitles(video_file, output_srt_file):

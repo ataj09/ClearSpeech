@@ -1,6 +1,8 @@
 import cv2
 import requests
 import numpy as np
+from fer.emotionsmultilanguage import emotions_dict
+
 
 # Function to extract frames from the video
 def extract_frames(video_path, skipping):
@@ -62,7 +64,7 @@ def analyze_movement(video_path, skipping = 15):
 
     # Step 1: Extract frames from the video
     frames = extract_frames(video_path, skipping)
-
+    emotions_dict = []
     # Check if frames were extracted
     if not frames:
         print("No frames extracted. Please check the video file path or format.")
@@ -71,4 +73,5 @@ def analyze_movement(video_path, skipping = 15):
     for i, frame in enumerate(frames):
         emotions = detect_emotions(frame)
         if emotions:
-            print(f"Frame {i}: Detected emotions: {emotions}")
+            emotions_dict.append(emotions)
+    return emotions_dict
