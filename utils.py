@@ -10,6 +10,7 @@ def extract_audio_from_video(video_path, output_audio_path):
 
     # Extract audio using moviepy or directly from the video
     video = cv2.VideoCapture(video_path)
+
     frame_rate = video.get(cv2.CAP_PROP_FPS)
     video.release()
 

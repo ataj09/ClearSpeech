@@ -1,6 +1,8 @@
 import cv2
 import requests
 import numpy as np
+from fer.emotionsmultilanguage import emotions_dict
+
 
 # Function to extract frames from the video
 def extract_frames(video_path, skipping):
@@ -62,7 +64,7 @@ def analyze_movement(video_path, skipping = 15):
 
     # Step 1: Extract frames from the video
     frames = extract_frames(video_path, skipping)
-
+    emotions_dict = []
     # Check if frames were extracted
     if not frames:
         print("No frames extracted. Please check the video file path or format.")
@@ -70,5 +72,32 @@ def analyze_movement(video_path, skipping = 15):
     # Step 2: Analyze each frame for emotions
     for i, frame in enumerate(frames):
         emotions = detect_emotions(frame)
-        if emotions:
-            print(f"Frame {i}: Detected emotions: {emotions}")
+        if emotions and emotions.get("status") == "success":
+            emotions_dict.append(emotions)
+
+    emotion_sums = {
+        "angry": 0.0,
+        "disgust": 0.0,
+        "fear": 0.0,
+        "happy": 0.0,
+        "neutral": 0.0,
+        "sad": 0.0,
+        "surprise": 0.0
+    }
+    emotion_count = 0
+
+    # Iterate over the emotions array
+    for entry in emotions_dict:
+        for face in entry["faces"]:
+            emotions = face["emotion"]
+            for key in emotion_sums:
+                emotion_sums[key] += emotions[key]
+            emotion_count += 1
+
+    # Calculate the average for each emotion
+    if emotion_count > 0:
+        emotion_averages = {key: value / emotion_count for key, value in emotion_sums.items()}
+    else:
+        emotion_averages = None
+    return emotion_averages
+
