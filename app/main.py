@@ -13,10 +13,10 @@ import math
 import time
 
 
-from app.movement_analysis import analyze_movement
-from app.text_analysis import analyze_text
-from app.sentiment_analysis import analyze_sentiment, summarize
-from app.analyze_audio_quality import analyze_audio_and_speech
+from movement_analysis import analyze_movement
+from text_analysis import analyze_text
+from sentiment_analysis import analyze_sentiment, summarize
+from analyze_audio_quality import analyze_audio_and_speech
 
 def clean_data(data):
     """Recursively clean the data, replacing NaN and Infinity with None"""
