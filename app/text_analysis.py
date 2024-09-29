@@ -1,22 +1,12 @@
-import pysrt
+import openai
 import spacy
 import textstat
-import ffmpeg
-import subprocess
-# Load the Polish language model
+import detectlanguage
+from openai import OpenAI
+from huggingface_hub import InferenceClient
+
+import os
 nlp = spacy.load("pl_core_news_sm")
-from moviepy.editor import VideoFileClip
-
-
-def extract_subtitles_with_moviepy(video_file):
-    video = VideoFileClip(video_file)
-    if not video:
-        print("Error opening video file.")
-        return None
-
-    # Attempt to extract subtitles (if available)
-    for sub in video.subtitles:
-        print(f"Subtitle: {sub}")
 
 def calculate_readability(text):
     # Calculate readability scores
@@ -46,28 +36,13 @@ def detect_language_errors(text):
 def analyze_text(text):
     flesch, gunning_fog = calculate_readability(text)
     language_errors = detect_language_errors(text)
-    return {"flesch": flesch, "gunning": gunning_fog, "errors": language_errors}
-
-
-
-def extract_subtitles(video_file, output_srt_file):
-    command = [
-        'ffmpeg',
-        '-i', video_file,
-        '-map', '0:s:0',
-        output_srt_file,
-        '-y'  # Overwrite existing file
-    ]
-
-    try:
-        subprocess.run(command, check=True)
-        print(f"Subtitles extracted to {output_srt_file}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error extracting subtitles: {e}")
-
-    subs = pysrt.open(output_srt_file)
-    subtitle_texts = [sub.text for sub in subs]
-    return " ".join(subtitle_texts)
+    return {
+        "flesch": flesch,
+        "gunning": gunning_fog,
+        "errors": language_errors,
+        "foreign_language": detect_foreign_language(text),
+        "use_passive_voice": is_passive_voice(text),
+    }
 
 def compare_phonetic_text(text1, text2):
     doc1 = nlp(text1)
@@ -77,3 +52,24 @@ def compare_phonetic_text(text1, text2):
     similarity = doc1.similarity(doc2)
     return similarity
 
+def detect_foreign_language(transcription):
+    detectlanguage.configuration.api_key = "313199b8e970410d3643d15635192e5f"
+
+
+    languages = detectlanguage.detect(transcription)
+    polish_detected = any(lang['language'] == 'pl' for lang in languages)
+    foreign_words_flag = any(lang['language'] != 'pl' and lang["isReliable"] == True for lang in languages)
+
+    return {"is_polish": polish_detected, "foreign_words": foreign_words_flag}
+
+def is_passive_voice(sentence):
+    doc = nlp(sentence)
+    for token in doc:
+        # Check for passive voice based on the presence of auxiliary verb "być" and a past participle
+        if token.dep_ == 'aux' and token.lemma_ == 'być':
+            # Look for the verb that follows "być" and check if it's a past participle
+            next_token = token.nbor()
+            if next_token.tag_ in ['VBD', 'VBN']:  # VBD = past tense verb, VBN = past participle
+                return True
+
+    return False

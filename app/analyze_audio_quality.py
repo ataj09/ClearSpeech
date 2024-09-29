@@ -31,21 +31,41 @@ def calculate_average_volume(audio_path):
 
 
 # Function to calculate SNR (Signal-to-Noise Ratio)
-def calculate_snr(audio_path):
+def calculate_snr(audio_path, threshold=0.01):
+    # Load audio file
     y, sr = librosa.load(audio_path, sr=None)
-    signal_mean = np.mean(y)
-    signal_std = np.std(y)
+
+    # Identify non-silent sections based on the amplitude threshold
+    non_silent_indices = np.where(np.abs(y) > threshold)[0]
+
+    if non_silent_indices.size == 0:
+        print("The audio is silent or below the threshold.")
+        return {"snr": np.nan, "flag": "silent"}
+
+    # Extract non-silent sections
+    y_non_silent = y[non_silent_indices]
+
+    # Calculate mean and std for non-silent sections
+    signal_mean = np.mean(y_non_silent)
+    signal_std = np.std(y_non_silent)
+
+    # Calculate SNR
+    if signal_std == 0:
+        print("All non-silent sections have the same amplitude.")
+        return {"snr": np.nan, "flag": "uniform signal"}
+
     snr = signal_mean / signal_std
     snr_dB = 10 * np.log10(snr)
-    flag = ""
+
     print(f"Signal-to-Noise Ratio (SNR): {snr_dB:.2f} dB")
 
     if snr_dB < 20:
         print("The audio has high background noise.")
-        flag = "backgroud noise"
+        flag = "background noise"
     else:
         print("The audio has good clarity.")
         flag = "good clarity"
+
     return {"snr": snr_dB, "flag": flag}
 
 
@@ -79,22 +99,6 @@ def identify_jargon(transcription, jargon_terms):
 
 
 # Step 6: Automatically detect foreign language words
-def detect_foreign_language(transcription):
-    foreign_words_detected = []
-    doc = nlp(transcription)
-
-    for token in doc:
-        # Using spaCy's language model to check if the word is in the known language
-        if not token.is_alpha or token.is_stop:  # Skip punctuation and stop words
-            continue
-
-        # Here, you can customize to check against a foreign language list if needed
-        if token.lang_ != "pl":  # Check if the token is not Polish
-            foreign_words_detected.append(token.text)
-
-    return foreign_words_detected
-
-
 
 # Main function to run all the analyses
 def analyze_audio_and_speech(video_path, audio_path, transcription):
@@ -112,8 +116,8 @@ def analyze_audio_and_speech(video_path, audio_path, transcription):
     # Step 5: Calculate speech rate based on transcription
     data["speech_rate"] = calculate_speech_rate(transcription, audio_path)
 
-    # Step 6: Detect speech activity based on energy levels
-    #detect_speech_activity(audio_path)
+
+
 
     return data
 

@@ -85,6 +85,8 @@ async def analyze_all(video_path, query_id):
     data["flesch"] = temp.get("flesch")
     data["gunning"] = temp.get("gunning")
     data["language_errors"] = temp.get("language_errors")
+    data["foreign_words"] = temp.get("foreign_language")
+    data["use_passive_voice"] = temp.get("use_passive_voice")
 
     data["emotions"] = analyze_movement(video_path)
     data["sentiment"] = analyze_sentiment(text)
