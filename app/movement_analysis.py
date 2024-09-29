@@ -1,7 +1,5 @@
 import cv2
 import requests
-import numpy as np
-from fer.emotionsmultilanguage import emotions_dict
 
 
 # Function to extract frames from the video
