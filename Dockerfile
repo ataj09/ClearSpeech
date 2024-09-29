@@ -11,7 +11,7 @@ COPY requirements.txt .
 
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 # Install the dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 
 # Copy the FastAPI app code into the container
