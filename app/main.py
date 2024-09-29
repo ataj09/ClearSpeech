@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 import shutil
 import os
@@ -179,3 +179,7 @@ async def get_video(query_id: str):
         return JSONResponse(content={"query_id": query_id, "data": safe_data})
     else:
         return JSONResponse(content={"query_id": query_id, "status": "100"})  # Still processing
+
+@app.options("/test")
+async def corsastuff():
+    return Response(status_code=204)
