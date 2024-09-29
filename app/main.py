@@ -16,12 +16,24 @@ from movement_analysis import analyze_movement
 from text_analysis import analyze_text
 from sentiment_analysis import analyze_sentiment, summarize
 from analyze_audio_quality import analyze_audio_and_speech
+from fastapi.middleware.cors import CORSMiddleware
 
 # Video storage to track the status and data of each query
 video_storage = {}
 
 # FastAPI app instance
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
 
 # Directory to save uploaded videos
