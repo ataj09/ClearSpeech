@@ -2,6 +2,7 @@
 
 To repozytorium zawiera aplikację webową opartą na FastAPI. Aplikacja jest konteneryzowana przy użyciu Dockera i zarządzana za pomocą Docker Compose, co ułatwia jej konfigurację i wdrażanie.
 http://34.118.86.83:3000/
+Frontend: https://github.com/mkaniowski/clear-speech-front
 ## Funkcje
 
 - Framework webowy FastAPI
