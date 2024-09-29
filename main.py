@@ -3,9 +3,6 @@ from google.cloud import speech_v1p1beta1 as speech
 from pydub import AudioSegment
 from fastapi.encoders import jsonable_encoder
 
-from text_analysis import extract_subtitles, compare_phonetic_text
-import os
-
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -16,10 +13,10 @@ import math
 import time
 
 
-from movement_analysis import analyze_movement
-from text_analysis import analyze_text
-from sentiment_analysis import analyze_sentiment, summarize
-from analyze_audio_quality import analyze_audio_and_speech
+from app.movement_analysis import analyze_movement
+from app.text_analysis import analyze_text
+from app.sentiment_analysis import analyze_sentiment, summarize
+from app.analyze_audio_quality import analyze_audio_and_speech
 
 def clean_data(data):
     """Recursively clean the data, replacing NaN and Infinity with None"""
@@ -55,6 +52,7 @@ def convert_stereo_to_mono(input_audio_path, output_audio_path):
 def transcribe_video(audio_path):
     # Transcribe audio
     client = speech.SpeechClient()
+    time.sleep(12000000)
 
     with open(audio_path, "rb") as audio_file_data:
         audio_content = audio_file_data.read()
