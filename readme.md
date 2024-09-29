@@ -1,7 +1,7 @@
 # ClearSpeech
 
 To repozytorium zawiera aplikację webową opartą na FastAPI. Aplikacja jest konteneryzowana przy użyciu Dockera i zarządzana za pomocą Docker Compose, co ułatwia jej konfigurację i wdrażanie.
-
+http://34.118.86.83:3000/
 ## Funkcje
 
 - Framework webowy FastAPI
