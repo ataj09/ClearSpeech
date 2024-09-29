@@ -1,19 +1,19 @@
-# app/Dockerfile
+# Dockerfile
 
 # Use the official Python image from DockerHub
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements.txt
-COPY ../requirements.txt .
+# Copy requirements.txt to the container
+COPY requirements.txt .
 
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the FastAPI app code to the container
-COPY . .
+# Copy the FastAPI app code into the container
+COPY ./app /app
 
 # Expose the port FastAPI runs on
 EXPOSE 8000
