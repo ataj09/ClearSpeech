@@ -1,9 +1,7 @@
-import openai
+
 import spacy
 import textstat
 import detectlanguage
-from openai import OpenAI
-from huggingface_hub import InferenceClient
 
 import os
 nlp = spacy.load("pl_core_news_sm")
