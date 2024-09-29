@@ -17,9 +17,27 @@ from text_analysis import analyze_text
 from sentiment_analysis import analyze_sentiment, summarize
 from analyze_audio_quality import analyze_audio_and_speech
 
+# Video storage to track the status and data of each query
+video_storage = {}
+
+# FastAPI app instance
+app = FastAPI()
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
+
+# Directory to save uploaded videos
+UPLOAD_DIR = "video"
+AUDIO_DIR = "audio"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(AUDIO_DIR, exist_ok=True)
+
+
+# Pydantic model for the response
+class VideoResponse(BaseModel):
+    query_id: str
+
 
 def clean_data(data):
-    """Recursively clean the data, replacing NaN and Infinity with None"""
+    """Recursively clean the data, replacing NaN and Infinity with None."""
     if isinstance(data, dict):
         return {key: clean_data(value) for key, value in data.items()}
     elif isinstance(data, list):
@@ -34,12 +52,14 @@ def clean_data(data):
 
 
 def extract_audio_from_video(video_path, output_audio_path):
+    """Extracts audio from the video and saves it as a WAV file."""
     video = VideoFileClip(video_path)
     video.audio.write_audiofile(output_audio_path)
     return output_audio_path
 
 
 def convert_stereo_to_mono(input_audio_path, output_audio_path):
+    """Converts stereo sound to mono."""
     audio = AudioSegment.from_wav(input_audio_path)
     mono_audio = audio.set_channels(1)
     mono_audio.export(output_audio_path, format="wav")
@@ -47,9 +67,8 @@ def convert_stereo_to_mono(input_audio_path, output_audio_path):
 
 
 def transcribe_video(audio_path):
+    """Uses Google Cloud to transcribe audio to text."""
     client = speech.SpeechClient()
-    time.sleep(10)  # Shortened for demo purposes
-
     with open(audio_path, "rb") as audio_file_data:
         audio_content = audio_file_data.read()
 
@@ -70,6 +89,7 @@ def transcribe_video(audio_path):
 
 
 async def analyze_all(video_path, query_id):
+    """Function centralizing all analysis processes on the video file."""
     print("Extracting audio")
     data = {}
     audio_path = "audio/" + video_path[6:-4] + ".wav"
@@ -99,27 +119,19 @@ async def analyze_all(video_path, query_id):
     print("Analysis completed")
 
 
-# Video storage to track the status and data of each query
-video_storage = {}
-
-# FastAPI app instance
-app = FastAPI()
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "credentials.json"
-
-# Directory to save uploaded videos
-UPLOAD_DIR = "video"
-AUDIO_DIR = "audio"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(AUDIO_DIR, exist_ok=True)
-
-# Pydantic model for the response
-class VideoResponse(BaseModel):
-    query_id: str
-
-
 # Endpoint to upload video and return query_id immediately
 @app.post("/upload_video", response_model=VideoResponse)
 async def upload_video(file: UploadFile = File(...), background_tasks: BackgroundTasks = BackgroundTasks()):
+    """
+    Upload a video file and start the analysis process in the background.
+
+    **Args:**
+    - file: The video file to be uploaded.
+
+    **Returns:**
+    - query_id: A unique identifier to track the video analysis process.
+    - status: Initial status of the processing (100 = in progress).
+    """
     # Generate a unique query ID
     query_id = str(uuid.uuid4())
 
@@ -145,6 +157,16 @@ async def upload_video(file: UploadFile = File(...), background_tasks: Backgroun
 # Endpoint to get the video analysis result by query_id
 @app.get("/video/{query_id}")
 async def get_video(query_id: str):
+    """
+    Retrieve the video analysis result by its unique query ID.
+
+    **Args:**
+    - query_id: The unique identifier for the uploaded video.
+
+    **Returns:**
+    - If the analysis is completed, the data is returned.
+    - If the analysis is still in progress, a status of 100 is returned.
+    """
     if query_id not in video_storage:
         raise HTTPException(status_code=404, detail="Video not found")
 

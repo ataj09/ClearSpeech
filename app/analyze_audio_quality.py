@@ -103,20 +103,12 @@ def identify_jargon(transcription, jargon_terms):
 # Main function to run all the analyses
 def analyze_audio_and_speech(video_path, audio_path, transcription):
     jargon_terms = ["technologia", "innowacja", "efektywny"]  # Example jargon terms
-    data = {}
-    # Step 2: Detect silence intervals
-    data["silence_intervals"] = detect_silence_intervals(audio_path)
-
-    # Step 3: Calculate average volume
-    data["average_volume"] = calculate_average_volume(audio_path)
-
-    # Step 4: Calculate SNR (Signal-to-Noise Ratio)
-    data["snr"] = calculate_snr(audio_path)
-
-    # Step 5: Calculate speech rate based on transcription
-    data["speech_rate"] = calculate_speech_rate(transcription, audio_path)
-
-
+    data = {
+        "silence_intervals": detect_silence_intervals(audio_path),
+        "average_volume": calculate_average_volume(audio_path),
+        "snr": calculate_snr(audio_path),
+        "speech_rate": calculate_speech_rate(transcription, audio_path)
+    }
 
 
     return data
